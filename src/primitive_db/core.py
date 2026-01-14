@@ -1,6 +1,8 @@
 from src.primitive_db.constants import SUPPORTED_TYPES
+from src.primitive_db.decorators import confirm_action, handle_db_errors, log_time
 
 
+@handle_db_errors
 def create_table(metadata: dict, table_name: str, args: list) -> dict:
     """
     Создает новую таблицу в метаданных.
@@ -30,6 +32,8 @@ def create_table(metadata: dict, table_name: str, args: list) -> dict:
     return metadata
 
 
+@handle_db_errors
+@confirm_action("удаление таблицы")
 def drop_table(metadata: dict, table_name: str) -> dict:
     """Удаляет таблицу из метаданных."""
     if table_name not in metadata:
@@ -60,6 +64,8 @@ def _cast_type(value: str, target_type: str):
     return value
 
 
+@handle_db_errors
+@log_time
 def insert(metadata: dict, table_name: str, table_data: list, values: list) -> dict:
     if table_name not in metadata:
         raise ValueError(f"Таблица {table_name} не существует.")
@@ -93,6 +99,8 @@ def insert(metadata: dict, table_name: str, table_data: list, values: list) -> d
     return new_row
 
 
+@handle_db_errors
+@log_time
 def select(table_data: list, where_clause: dict = None) -> list:
     if not where_clause:
         return table_data
@@ -110,6 +118,8 @@ def select(table_data: list, where_clause: dict = None) -> list:
     return result
 
 
+@handle_db_errors
+@confirm_action("удаление записей")
 def delete(table_data: list, where_clause: dict) -> list:
     if not where_clause:
         raise ValueError("Для удаления необходимо указать условие WHERE.")
@@ -133,6 +143,7 @@ def delete(table_data: list, where_clause: dict) -> list:
     return new_data
 
 
+@handle_db_errors
 def update(metadata: dict, table_name: str, table_data: list,
            set_clause: dict, where_clause: dict) -> list:
     if not where_clause:
